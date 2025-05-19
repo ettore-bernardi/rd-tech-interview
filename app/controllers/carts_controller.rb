@@ -11,6 +11,14 @@ class CartsController < ApplicationController
     render json: @cart, serializer: CartSerializer, status: :created
   end
 
+  def show
+    if @cart
+      render json: @cart, serializer: CartSerializer, status: :ok
+    else
+      render json: { error: 'Cart not found' }, status: :not_found
+    end
+  end
+
   private
 
   def cart_items_params
