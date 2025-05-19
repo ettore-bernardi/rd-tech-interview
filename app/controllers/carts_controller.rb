@@ -27,6 +27,17 @@ class CartsController < ApplicationController
     render json: @cart, serializer: CartSerializer, status: :ok
   end
 
+  def destroy
+    @cart_item = @cart.cart_items.find_by(product_id: cart_items_params[:product_id])
+    if @cart_item
+      @cart_item.destroy
+      @cart.update_total_price
+      render json: @cart, serializer: CartSerializer, status: :ok
+    else
+      render json: { error: "Product with id #{cart_items_params[:product_id]} not found in cart" }, status: :not_found
+    end
+  end
+
   private
 
   def cart_items_params
