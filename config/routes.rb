@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :products
 
   post 'cart' => 'carts#create', as: :cart_create
+  post 'cart/add_item' => 'carts#add_item', as: :cart_add_item
   get 'cart' => 'carts#show', as: :cart_show
 
   get 'up' => 'rails/health#show', as: :rails_health_check

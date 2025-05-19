@@ -19,6 +19,14 @@ class CartsController < ApplicationController
     end
   end
 
+  def add_item
+    @cart_item = @cart.cart_items.find_or_initialize_by(product_id: cart_items_params[:product_id])
+    @cart_item.quantity += cart_items_params[:quantity].to_i
+    @cart_item.save
+    @cart.update_total_price
+    render json: @cart, serializer: CartSerializer, status: :ok
+  end
+
   private
 
   def cart_items_params
