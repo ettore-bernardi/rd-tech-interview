@@ -3,24 +3,15 @@ class MarkCartAsAbandonedJob
 
   def perform(*args)
     cart_id = args[0]
-    action = args[1]
-
     cart = Cart.find_by(id: cart_id)
     return unless cart
 
-    handle_cart_action(cart, action)
+    cart.abandoned!
+    schedule_cart_deletion_job(cart)
   end
 
-  def handle_cart_action(cart, action)
-    case action.to_sym
-    when :abandon
-      cart.abandoned!
-    when :delete
-      cart.destroy
-    else
-      Rails.logger.error("Unknown action: #{action}")
-    end
-  rescue StandardError => e
-    Rails.logger.error("Error processing cart action: #{e.message}")
+  def schedule_cart_deletion_job(cart)
+    job_id = DeleteAbandonedCartJob.perform_at(7.days.from_now, cart.id)
+    cart.update_attribute(:deletion_job_id, job_id)
   end
 end

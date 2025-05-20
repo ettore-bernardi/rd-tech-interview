@@ -6,21 +6,32 @@ class Cart < ApplicationRecord
 
   enum status: { active: 0, completed: 1, abandoned: 2 }
 
-  after_update :schedule_cart_abandonment_job, if: :active?
-  after_update :schedule_cart_deletion_job, if: :abandoned?
+  after_update :schedule_cart_abandonment_job
+  after_update :activate_cart
 
   def update_total_price
     self.total_price = cart_items.inject(0) { |sum, item| sum + (item.product.price * item.quantity) }
-    save
+    save!
   end
 
   private
 
   def schedule_cart_abandonment_job
-    MarkCartAsAbandonedJob.perform_at(3.hours.from_now, id, 'abandon')
+    return if job_id_changed?
+    return if abandoned?
+
+    HandleCartAbandonmentService.new(id).call
   end
 
-  def schedule_cart_deletion_job
-    MarkCartAsAbandonedJob.perform_at(7.days.from_now, id, 'delete')
+  def activate_cart
+    return if active?
+    return if saved_change_to_attribute?(:status)
+    return if job_id_changed?
+
+    active!
+  end
+
+  def job_id_changed?
+    saved_change_to_attribute?(:deletion_job_id) || saved_change_to_attribute?(:abandonment_job_id)
   end
 end
