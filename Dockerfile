@@ -46,14 +46,20 @@ RUN apt-get update -qq && \
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
+# Ensure the docker-entrypoint script is executable
+RUN chmod +x /rails/bin/docker-entrypoint
+
+# Ensure all scripts in the bin directory are executable
+RUN chmod +x /rails/bin/*
+
+COPY bin/start /usr/local/bin/start
+RUN chmod +x /usr/local/bin/start
+
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
 
-# Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD ["./bin/rails", "server"]
+CMD ["start"]
