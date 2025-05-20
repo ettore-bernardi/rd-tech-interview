@@ -105,6 +105,8 @@ GEM
     eventmachine (1.2.7)
     factory_bot (6.5.1)
       activesupport (>= 6.1.0)
+    faker (3.5.1)
+      i18n (>= 1.8.11, < 2)
     ffi (1.17.0-aarch64-linux-gnu)
     ffi (1.17.0-arm-linux-gnu)
     ffi (1.17.0-arm64-darwin)
@@ -326,6 +328,7 @@ DEPENDENCIES
   bootsnap
   byebug
   factory_bot
+  faker
   guard
   guard-livereload
   pg (~> 1.1)
